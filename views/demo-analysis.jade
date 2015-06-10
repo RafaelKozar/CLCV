@@ -1,0 +1,124 @@
+block variables
+  - title="Image analysis demo - CloudCV"
+
+extends layout
+
+block content
+    div.container
+        h1 Image analysis example
+
+        p You may pick one of the existing images for a quick result from the following list or upload your own image. There is no limit on size of uploaded images for now. 
+        p 
+            | Please ready the 
+            a(href='/privacy') privacy statement 
+            | to feel safe about images you upload (in short: it's safe).
+
+        form(method='post',id='process-image-form',enctype="multipart/form-data",style='opacity:0')                   
+            input(type="file",name='image',id="file-selector",accept="image/*")
+            input(type='submit') Submit
+
+        div.row
+            each demoImage in example.availableImages
+                div.col-sm-6.col-md-2
+                    div.thumbnail
+                        img(src="#{demoImage.thumbnailURL}")
+                        div.caption
+                            form(method="post")                                
+                                button.btn.btn-default(type="submit") #{demoImage.key} 
+                                input(type="hidden",name="image",value="#{demoImage.key}")
+
+            div.col-sm-6.col-md-2
+                div.thumbnail
+                    img(data-src='holder.js/128x128/gray/text:Upload image')
+                    div.caption                            
+                        button.btn.btn-primary(onclick="$('#file-selector').click();") Choose image 
+
+                        
+                            
+
+
+                    
+
+
+        div.output(id="output")
+        
+            - if (typeof(result) !== 'undefined'){
+
+            h2 Analyze results
+                a(href='#content')
+
+            div.panel.panel-default
+                .panel-heading Source image
+                .panel-body
+                    .row
+                        .col-md-6       
+                            img(src="#{result.common.sourceImage}")
+                        .col-md-6       
+                            - if (result.common.hasColor) {   
+                            img(src="#{result.color.histogramImage}")
+                            - }
+                            br
+                            br
+                            ul
+                                li Image frame size #{result.common.frameSize.width}:#{result.common.frameSize.height}
+                                li Image aspect ratio is #{result.common.aspectRatio.width}:#{result.common.aspectRatio.height}
+                                                         
+
+            div.panel.panel-default
+                .panel-heading Grayscale
+                .panel-body
+                    .row
+                        .col-md-6       
+                            img(src="#{result.common.grayscaleImage}")
+                        .col-md-6       
+                            img(src="#{result.grayscale.histogramImage}")
+                            br
+                            br
+                            ul
+                                li Contrast #{result.grayscale.rmsContrast}
+                                li Min brightness #{result.grayscale.intensity.min}
+                                li Max brightness #{result.grayscale.intensity.max}
+                                li Average brightness #{result.grayscale.intensity.average}
+
+            - if (result.common.hasColor) {
+
+            div.panel.panel-default
+                .panel-heading Analyze of colors
+                .panel-body
+                    .row
+                        .col-md-6       
+                            img(src="#{result.color.dominantColorsImage}")
+                        .col-md-6       
+                            ul
+                                li Total unique colors - #{result.color.uniqieColors}
+                                li Reduced colors - #{result.color.reducedColors}
+                                li Dominant colors - #{result.color.dominantColors.length}
+
+            - } 
+
+            div.panel.panel-default
+                .panel-heading Edges
+                .panel-body
+                    .row
+                        .col-md-6       
+                            img(src="#{result.edges.cannyImage}")
+                        .col-md-6       
+                            ul
+                                li Canny lower threshold #{result.edges.cannyLowerThreshold}
+                                li Canny upper threshold #{result.edges.cannyUpperThreshold}
+
+            -}
+
+block scripts
+    script $(document).ready(function () { document.getElementById('file-selector').addEventListener('change', function(e) { console.log('file selected'); var f = $('#process-image-form'); console.log(f); f.submit(); } );  });
+
+    - if (typeof(result) !== 'undefined'){
+        script.
+            $(document).ready(function () { 
+                
+                    var l = $("#output").offset().top; 
+                    console.log(l); 
+                    $('html, body').animate({scrollTop: l}, 200); 
+                
+            });
+    -}
